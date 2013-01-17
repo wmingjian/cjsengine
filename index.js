@@ -1,6 +1,6 @@
 /*
 CJS文件执行引擎
-@copyright 2012 alz <wmingjian@qq.com>
+@copyright 2012-2013 alz <wmingjian@qq.com>
 @license MIT
 */
 var fs = require("fs");
@@ -63,6 +63,7 @@ CjsEngine.prototype = {
 		}
 		cb(statusCode, ex);
 	},
+	//[TODO]回调函数只有出错的时候才会被调用
 	execFunc: function(func, params, cb){
 		try{
 			func.apply(null, params);  //执行文件内容
