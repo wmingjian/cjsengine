@@ -64,27 +64,33 @@ CjsEngine.prototype = {
 		cb(statusCode, ex);
 	},
 	//[TODO]回调函数只有出错的时候才会被调用
-	execFunc: function(func, params, cb){
+	execFunc: function(func, agent, argv, cb){
 		try{
-			func.apply(null, params);  //执行文件内容
+			func.apply(agent, argv);  //执行文件内容
 		}catch(ex){  //执行出错
 			this.callback(cb, 500, ex);
 		}
 	},
-	invokeCjs: function(stats, filename, params, cb){
+	invokeCjs: function(stats, filename, agent, argv, cb){
 		var mtime = stats.mtime,
 			cache = this._files[filename],
 			func;
 		if(cache && cache.mtime >= mtime){  //判断缓存是否有效？
 			func = cache.func;
-			this.execFunc(func, params, cb);
+			this.execFunc(func, agent, argv, cb);
 		}else{
 			var me = this;
 			fs.readFile(filename, "utf8", function(ex, code){
 				if(ex){  //读文件出错
 					me.callback(cb, 500, ex);
 				}else{
-					var content = "exports.__main__ = function(" + me.options.params + "){\n" + code + "\n};";
+					var content;
+					if(/^function *\([\w, ]*\) *\{/.test(code)){  //\r?\n
+						content = "exports.__main__ = " + code + ";";
+					}else{
+						content = "exports.__main__ = function(" + me.options.params + "){\n" + code + "\n};";
+					}
+					//console.log(content);
 					var module = new Module();  //[TODO]模块可能已经存在
 					try{
 						module._compile(me, content, filename)
@@ -101,12 +107,12 @@ CjsEngine.prototype = {
 						"code"    : code,
 						"func"    : func
 					};
-					me.execFunc(func, params, cb);
+					me.execFunc(func, agent, argv, cb);
 				}
 			});
 		}
 	},
-	invoke: function(pathname, params, cb){
+	invoke: function(pathname, agent, argv, cb){
 		var opts = this.options;
 		var filename = opts.path_base + pathname;
 		var me = this;
@@ -119,7 +125,7 @@ CjsEngine.prototype = {
 				}else if(stats.isFile()){  //文件
 					var ext = path.extname(filename);
 					if(ext == opts.fileext){  //解释执行
-						me.invokeCjs(stats, filename, params, cb);
+						me.invokeCjs(stats, filename, agent, argv, cb);
 					}else{
 						me.callback(cb, 403);
 					}
