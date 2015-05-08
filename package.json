@@ -1,11 +1,11 @@
 {
   "name": "cjsengine",
   "description": "cloud js execute engine",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "author": "wmingjian <wmingjian@qq.com>",
   "keywords": ["cjs", "cjsengine", "cloudjs"],
   "dependencies": {},
   "devDependencies": {},
   "main": "./index.js",
-  "repository": "https://github.com/wmingjian/cjsengine.gi"
+  "repository": "https://github.com/wmingjian/cjsengine.git"
 }
